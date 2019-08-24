@@ -3,12 +3,17 @@
 #include "Adafruit_CCS811.h"
 #include "BlueDot_BME280.h"
 #include "co2_thing_display.h"
+#include "co2_thing_pubsub.h"
+#include "measurement.h"
 
 #define DISPLAY_ADDRESS 0x3C
 #define CO2_SENSOR_ADDRESS 0x5A
 #define BME280_ADDRESS 0x76
+#define LED_PIN 5
+#define CCS_OK 0
 
 CO2ThingDisplay display(DISPLAY_ADDRESS);
+CO2ThingPubsub pubsub;
 Adafruit_CCS811 ccs;
 BlueDot_BME280 bme;
 
@@ -26,31 +31,46 @@ void setup() {
 
     initCCS881();
 
+    pubsub.connect();
+
     display.clear();
 }
 
 void loop() {
-    ccs.setEnvironmentalData(bme.readHumidity(), bme.readTempC());
+    digitalWrite(LED_PIN, HIGH);
+    pubsub.loop();
 
+    float temperature = bme.readTempC();
+    float humidity = bme.readHumidity();
+    float pressure = bme.readPressure();
+
+    Measurement measurement;
+    measurement.temperature = temperature;
+    measurement.humidity = humidity;
+    measurement.pressure = pressure;
     if (ccs.available()) {
-        if (ccs.readData() == 0) {
-            display.showData(ccs.geteCO2(), ccs.getTVOC());
+        ccs.setEnvironmentalData(humidity, temperature);
+
+        if (ccs.readData() == CCS_OK) {
+            int eCO2 = ccs.geteCO2();
+            int tVOC = ccs.getTVOC();
+            measurement.eCO2 = eCO2;
+            measurement.tVOC = tVOC;
+            display.showData(eCO2, tVOC);
+        }
+        else {
+            measurement.err = 1;
         }
     }
+    else {
+        measurement.err = 1;
+    }
 
-    Serial.print("temp = ");
-    Serial.print(bme.readTempC());
-    Serial.println("C");
+    pubsub.sendMeasurement(measurement);
 
-    Serial.print("pressure = ");
-    Serial.print(bme.readPressure());
-    Serial.println("hPa");
-
-    Serial.print("humidity = ");
-    Serial.print(bme.readHumidity());
-    Serial.println("%");
-
-    delay(1000);
+    delay(500);
+    digitalWrite(LED_PIN, LOW);
+    delay(1500);
 }
 
 void initBME280() {
