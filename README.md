@@ -22,6 +22,11 @@ https://easyeda.com/filiplamparski/atmesphere-v2
 See this writeup: https://dev.to/minkovsky/working-on-my-iot-air-quality-monitoring-setup-40a5
 I also have a board without the UART connector that fits the CCS811 breakout and a BME280 breakout.
 
+## Building
+
+You'll need to add a `wifi_config.h` - use the sample in `docs/` to customise for your own
+network.
+
 ## Visual Studio Code settings
 
 Check `docs/c_cpp_properties.sample.json`. Replace `%USERNAME%` with your own username or change
