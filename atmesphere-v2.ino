@@ -9,7 +9,7 @@
 #define DISPLAY_ADDRESS 0x3C
 #define CO2_SENSOR_ADDRESS 0x5A
 #define BME280_ADDRESS 0x76
-#define LED_PIN 5
+#define LED_PIN 35
 #define CCS_OK 0
 
 CO2ThingDisplay display(DISPLAY_ADDRESS);
@@ -31,14 +31,21 @@ void setup() {
 
     initCCS881();
 
-    pubsub.connect();
+    auto pubsubStatus = pubsub.connect();
+    if (pubsubStatus != PUBSUB_OK) {
+        display.showError("connect fail");
+        while (1);
+    }
 
     display.clear();
 }
 
 void loop() {
     digitalWrite(LED_PIN, HIGH);
-    pubsub.loop();
+    auto pubsubStatus = pubsub.loop();
+    if (pubsubStatus != PUBSUB_OK) {
+        ESP.restart();
+    }
 
     float temperature = bme.readTempC();
     float humidity = bme.readHumidity();

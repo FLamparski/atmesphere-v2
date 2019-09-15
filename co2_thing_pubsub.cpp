@@ -4,7 +4,7 @@ CO2ThingPubsub::CO2ThingPubsub()
 : wifi(), mqtt(wifi)
 {}
 
-void CO2ThingPubsub::connect() {
+PubsubConnectResult CO2ThingPubsub::connect() {
     if (!WiFi.isConnected()) {
         WiFi.begin(WIFI_SSID, WIFI_PASS);
         WiFi.setAutoConnect(true);
@@ -15,16 +15,24 @@ void CO2ThingPubsub::connect() {
 
         if (!WiFi.isConnected()) {
             Serial.println("Could not connect to WiFi");
-            return;
+            return PUBSUB_WIFI_FAIL;
         }
     }
 
     mqtt.setServer(MQTT_HOST, MQTT_PORT);
-    
+
     for (size_t n = 0; n < WIFI_MAX_TRIES && !mqtt.connected(); n++) {
         mqtt.connect(CLIENT_ID);
         delay(1000);
     }
+
+    if (!mqtt.connected()) {
+        return PUBSUB_MQTT_FAIL;
+    }
+
+    mqtt.loop();
+
+    return PUBSUB_OK;
 }
 
 void CO2ThingPubsub::sendMeasurement(const Measurement& measurement) {
@@ -44,6 +52,11 @@ void CO2ThingPubsub::sendMeasurement(const Measurement& measurement) {
     mqtt.publish(TOPIC, payload);
 }
 
-void CO2ThingPubsub::loop() {
+PubsubConnectResult CO2ThingPubsub::loop() {
+    if (!(WiFi.isConnected() && mqtt.connected())) {
+        return connect();
+    }
+
     mqtt.loop();
+    return PUBSUB_OK;
 }

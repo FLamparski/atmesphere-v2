@@ -11,13 +11,19 @@
 // this helper macro adds it
 #define MEASURE_JSON_BUFFER(doc) (measureJson(doc) + 1)
 
+enum PubsubConnectResult {
+    PUBSUB_OK = 0,
+    PUBSUB_WIFI_FAIL,
+    PUBSUB_MQTT_FAIL
+};
+
 class CO2ThingPubsub {
     public:
         CO2ThingPubsub();
 
-        void connect();
+        PubsubConnectResult connect();
+        PubsubConnectResult loop();
         void sendMeasurement(const Measurement& measurement);
-        void loop();
     private:
         WiFiClient wifi;
         PubSubClient mqtt;
