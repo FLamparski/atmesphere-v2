@@ -49,7 +49,7 @@ void CO2ThingPubsub::sendMeasurement(const CO2Measurement& measurement) {
     char payload[jsonLen];
     serializeJson(doc, payload, jsonLen);
 
-    //mqtt.publish(TOPIC_CO2, payload);
+    mqtt.publish(TOPIC_CO2, payload);
     Serial.println(payload);
 }
 
@@ -64,15 +64,15 @@ void CO2ThingPubsub::sendMeasurement(const PMMeasurement& measurement) {
     char payload[jsonLen];
     serializeJson(doc, payload, jsonLen);
 
-    //mqtt.publish(TOPIC_PM, payload);
+    mqtt.publish(TOPIC_PM, payload);
     Serial.println(payload);
 }
 
 PubsubConnectResult CO2ThingPubsub::loop() {
-    /*if (!(WiFi.isConnected() && mqtt.connected())) {
+    if (!(WiFi.isConnected() && mqtt.connected())) {
         return connect();
     }
 
-    mqtt.loop();*/
+    mqtt.loop();
     return PUBSUB_OK;
 }

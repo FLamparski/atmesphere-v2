@@ -50,11 +50,11 @@ void setup() {
     initSDS011();
     display.showMessage("SDS011 ok");
 
-    /*auto pubsubStatus = pubsub.connect();
+    auto pubsubStatus = pubsub.connect();
     if (pubsubStatus != PUBSUB_OK) {
         display.showError("connect fail");
         while (1);
-    }*/
+    }
     display.showMessage("connect ok");
     delay(1000);
 
@@ -114,7 +114,7 @@ void initCCS881() {
     digitalWrite(CCS_RST_PIN, HIGH);
 
     if (!ccs.begin(CO2_SENSOR_ADDRESS)) {
-        display.showError("sensor fail");
+        display.showError("ccs fail");
         while (1);
     }
     while (!ccs.available());
@@ -122,9 +122,28 @@ void initCCS881() {
 
 void initSDS011() {
     sds.begin();
-    sds.wakeup();
-    sds.setQueryReportingMode(); // only report when asked
-    sds.setContinuousWorkingPeriod(); // run continuously
+
+    sds.wakeupUnsafe();
+    auto wakRes = sds.wakeup();
+    if (!wakRes.isOk()) {
+        Serial.println(wakRes.statusToString());
+        display.showError("sds fail");
+        while (1);
+    }
+
+    auto queryRes = sds.setQueryReportingMode(); // only report when asked
+    if (!queryRes.isOk()) {
+        Serial.println(queryRes.statusToString());
+        display.showError("sds fail");
+        while (1);
+    }
+
+    auto workRes = sds.setContinuousWorkingPeriod(); // run continuously
+    if (!workRes.isOk()) {
+        Serial.println(workRes.statusToString());
+        display.showError("sds fail");
+        while (1);
+    }
     sds.sleep();
 }
 
@@ -172,12 +191,12 @@ void doPMMeasurement(PMMeasurement& measurement) {
             sum_pm25 += res.pm25;
             sum_pm10 += res.pm10;
         } else {
+            Serial.println(res.statusToString());
             n_fail++;
         }
         pubsub.loop();
         delay(1000);
     }
-    Serial.println();
 
     float avg_pm25 = sum_pm25 / n_ok;
     float avg_pm10 = sum_pm10 / n_ok;
