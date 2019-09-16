@@ -12,6 +12,7 @@ class CO2ThingDisplay {
         void clear();
 
         void showSplash();
+        void showMessage(String text);
         void showError(String text);
         void showData(uint16_t eCO2, uint16_t tVOC);
     private:

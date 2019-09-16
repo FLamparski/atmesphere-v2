@@ -23,7 +23,8 @@ class CO2ThingPubsub {
 
         PubsubConnectResult connect();
         PubsubConnectResult loop();
-        void sendMeasurement(const Measurement& measurement);
+        void sendMeasurement(const CO2Measurement& measurement);
+        void sendMeasurement(const PMMeasurement& measurement);
     private:
         WiFiClient wifi;
         PubSubClient mqtt;

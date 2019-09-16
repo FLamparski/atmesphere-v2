@@ -8,12 +8,13 @@ const char* LABEL_TVOC = "tVOC";
 #define LABEL_TVOC_LEN 5
 
 CO2ThingDisplay::CO2ThingDisplay(byte addr)
-: _display(addr, SDA, SCL, GEOMETRY_128_32)
+: _display(addr, SDA, SCL, GEOMETRY_128_64)
 {}
 
 void CO2ThingDisplay::begin() {
     _display.init();
     _display.resetDisplay();
+    _display.flipScreenVertically();
     _display.displayOn();
 }
 
@@ -36,6 +37,13 @@ void CO2ThingDisplay::showError(String text) {
     clear();
 
     _display.invertDisplay();
+    _display.drawString(0, 0, text);
+    _display.display();
+}
+
+void CO2ThingDisplay::showMessage(String text) {
+    clear();
+
     _display.drawString(0, 0, text);
     _display.display();
 }

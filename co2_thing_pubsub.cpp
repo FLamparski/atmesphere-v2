@@ -35,7 +35,7 @@ PubsubConnectResult CO2ThingPubsub::connect() {
     return PUBSUB_OK;
 }
 
-void CO2ThingPubsub::sendMeasurement(const Measurement& measurement) {
+void CO2ThingPubsub::sendMeasurement(const CO2Measurement& measurement) {
     StaticJsonDocument<512> doc;
     doc["client"] = CLIENT_ID;
     doc["eCO2"] = measurement.eCO2;
@@ -49,14 +49,30 @@ void CO2ThingPubsub::sendMeasurement(const Measurement& measurement) {
     char payload[jsonLen];
     serializeJson(doc, payload, jsonLen);
 
-    mqtt.publish(TOPIC, payload);
+    //mqtt.publish(TOPIC_CO2, payload);
+    Serial.println(payload);
+}
+
+void CO2ThingPubsub::sendMeasurement(const PMMeasurement& measurement) {
+    StaticJsonDocument<512> doc;
+    doc["client"] = CLIENT_ID;
+    doc["pm25"] = measurement.pm25;
+    doc["pm10"] = measurement.pm10;
+    doc["err"] = measurement.err;
+
+    size_t jsonLen = MEASURE_JSON_BUFFER(doc);
+    char payload[jsonLen];
+    serializeJson(doc, payload, jsonLen);
+
+    //mqtt.publish(TOPIC_PM, payload);
+    Serial.println(payload);
 }
 
 PubsubConnectResult CO2ThingPubsub::loop() {
-    if (!(WiFi.isConnected() && mqtt.connected())) {
+    /*if (!(WiFi.isConnected() && mqtt.connected())) {
         return connect();
     }
 
-    mqtt.loop();
+    mqtt.loop();*/
     return PUBSUB_OK;
 }
