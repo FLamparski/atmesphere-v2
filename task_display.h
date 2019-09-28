@@ -15,8 +15,7 @@ void taskDisplay(void* p);
 
 enum DisplayRequestType {
     DISPLAY_REQUEST_UPDATE_DATA,
-    DISPLAY_REQUEST_MESSAGE,
-    DISPLAY_REQUEST_SPLASH
+    DISPLAY_REQUEST_MESSAGE
 };
 
 typedef struct DisplayUpdateDataRequest {

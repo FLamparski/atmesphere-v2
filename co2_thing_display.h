@@ -15,6 +15,7 @@ class CO2ThingDisplay {
         void showMessage(String text);
         void showError(String text);
         void showData(uint16_t eCO2, uint16_t tVOC);
+        void showPM(float pm25, float pm10);
     private:
         SSD1306Wire _display;
 };
