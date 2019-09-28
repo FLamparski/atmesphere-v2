@@ -1,3 +1,5 @@
+#define ARDUINO_SAMD_VARIANT_COMPLIANCE
+
 #include "SdsDustSensor.h"
 
 #include "measurement.h"

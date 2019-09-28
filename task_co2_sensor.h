@@ -3,9 +3,11 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+#include <freertos/semphr.h>
 
 typedef struct TaskCO2SensorContext {
     xQueueHandle co2DataQueue;
+    xSemaphoreHandle i2cSemaphore;
 } TaskCO2SensorContext;
 
 extern TaskCO2SensorContext taskCO2SensorContext;

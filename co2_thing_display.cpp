@@ -33,7 +33,7 @@ void CO2ThingDisplay::showSplash() {
     clear();
 
     _display.setFont(ArialMT_Plain_24);
-    _display.drawString(0, 0, "CO2 Thing");
+    _display.drawString(5, 18, "CO2 Thing");
     _display.setFont(DEFAULT_FONT);
     _display.display();
 }
@@ -55,6 +55,8 @@ void CO2ThingDisplay::showMessage(String text) {
 
 void CO2ThingDisplay::showData(uint16_t eCO2, uint16_t tVOC) {
     _display.clear();
+    _display.normalDisplay();
+
     String eCO2_str(eCO2, DEC);
     String tVOC_str(tVOC, DEC);
 
@@ -73,6 +75,8 @@ void CO2ThingDisplay::showData(uint16_t eCO2, uint16_t tVOC) {
 
 void CO2ThingDisplay::showPM(float pm25, float pm10) {
     _display.clear();
+    _display.normalDisplay();
+
     String pm25_str(pm25, 2);
     String pm10_str(pm10, 2);
 
