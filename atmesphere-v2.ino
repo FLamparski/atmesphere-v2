@@ -9,6 +9,7 @@
 #include "task_pm_sensor.h"
 #include "task_co2_sensor.h"
 #include "task_display.h"
+#include "task_ble.h"
 
 #define LED_PIN 4
 
@@ -17,6 +18,7 @@
 xQueueHandle pmDataQueue;
 xQueueHandle co2DataQueue;
 xQueueHandle displayQueue;
+xQueueHandle bleDataQueue;
 xSemaphoreHandle i2cSemaphore;
 
 void setup() {
@@ -30,6 +32,7 @@ void setup() {
     pmDataQueue = xQueueCreate(1, sizeof(PMMeasurement));
     co2DataQueue = xQueueCreate(1, sizeof(CO2Measurement));
     displayQueue = xQueueCreate(1, sizeof(DisplayRequest));
+    bleDataQueue = xQueueCreate(1, sizeof(BleData));
 
     taskDisplayContext.displayRequestQueue = displayQueue;
     taskDisplayContext.i2cSemaphore = i2cSemaphore;
@@ -44,11 +47,15 @@ void setup() {
     taskCO2SensorContext.i2cSemaphore = i2cSemaphore;
     xTaskCreate(taskCO2Sensor, "co2Sensor", 2048, NULL, 1, NULL);
 
+    taskBleContext.bleDataQueue = bleDataQueue;
+    xTaskCreate(taskBle, "ble", 2048, NULL, 1, NULL);
+
     Serial.println("co2Sensor task started");
 }
 
 void loop() {
     digitalWrite(LED_PIN, HIGH);
+    auto ticksStart = xTaskGetTickCount();
     PMMeasurement pmMeasurement;
     CO2Measurement co2Measurement;
     if (xQueueReceive(taskPMSensorContext.pmDataQueue, &pmMeasurement, 1000) &&
@@ -67,6 +74,16 @@ void loop() {
         req.type = DISPLAY_REQUEST_UPDATE_DATA;
         req.update = dataReq;
         xQueueSendToFront(displayQueue, &req, 500);
+
+        BleData bleData;
+        bleData.type = BLE_DATA_TYPE_CO2;
+        bleData.co2Measurement = co2Measurement;
+        xQueueSendToFront(bleDataQueue, &bleData, 500);
     }
-    vTaskDelay(1000);
+
+    auto ticksEnd = xTaskGetTickCount();
+    auto ticksDuration = ticksEnd - ticksStart;
+    if (ticksDuration < 1000) {
+        vTaskDelay(1000 - ticksDuration);
+    }
 }
